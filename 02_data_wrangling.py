@@ -65,7 +65,7 @@
 
 # Placing your imports all together at the start of your notebook means you only need to consult one place to check your notebook's dependencies. By all means import something 'in situ' later on when you're experimenting, but if the imported dependency ends up being kept, you should subsequently move the import statement here with the rest.
 
-# In[19]:
+# In[1]:
 
 
 #Code task 1#
@@ -90,17 +90,17 @@ import os
 
 # ## 2.5 Load The Ski Resort Data<a id='2.5_Load_The_Ski_Resort_Data'></a>
 
-# In[20]:
+# In[2]:
 
 
 # the supplied CSV data file is the raw_data directory
 ski_data = pd.read_csv('/Users/shayansorooshian/Desktop/cs/DATA Science /Guided Capstone/DATA Wrangling/ski_resort_data.csv')
-ski_data.head()
+ski_data.isnull().sum
 
 
 # Good first steps in auditing the data are the info method and displaying the first few records with head.
 
-# In[21]:
+# In[3]:
 
 
 #Code task 2#
@@ -112,7 +112,7 @@ ski_data.info
 
 # This immediately raises the question of what quantity will you want to model? You know you want to model the ticket price, but you realise there are two kinds of ticket price!
 
-# In[22]:
+# In[4]:
 
 
 #Code task 3#
@@ -128,7 +128,7 @@ ski_data.head()
 
 # Your resort of interest is called Big Mountain Resort. Check it's in the data:
 
-# In[28]:
+# In[23]:
 
 
 #Code task 4#
@@ -144,7 +144,7 @@ ski_data[ski_data.Name == 'Big Mountain Resort'].transpose()
 
 # Count the number of missing values in each column and sort them.
 
-# In[31]:
+# In[24]:
 
 
 #Code task 5#
@@ -152,6 +152,7 @@ ski_data[ski_data.Name == 'Big Mountain Resort'].transpose()
 #ski_data as well as the percentages (using `.mean()` instead of `.sum()`).
 #Order them (increasing or decreasing) using sort_values
 #Call `pd.concat` to present these in a single table (DataFrame) with the helpful column names 'count' and '%'
+# go over this one!!!
 missing = pd.concat([ski_data.isnull().sum(), 100 * ski_data.isnull().mean()], axis=1)
 missing.columns=['count', '%']
 missing.sort_values(by='%')
@@ -163,7 +164,7 @@ missing.sort_values(by='%')
 
 # So far you've examined only the numeric features. Now you inspect categorical ones such as resort name and state. These are discrete entities. 'Alaska' is a name. Although names can be sorted alphabetically, it makes no sense to take the average of 'Alaska' and 'Arizona'. Similarly, 'Alaska' is before 'Arizona' only lexicographically; it is neither 'less than' nor 'greater than' 'Arizona'. As such, they tend to require different handling than strictly numeric quantities. Note, a feature _can_ be numeric but also categorical. For example, instead of giving the number of `fastEight` lifts, a feature might be `has_fastEights` and have the value 0 or 1 to denote absence or presence of such a lift. In such a case it would not make sense to take an average of this or perform other mathematical calculations on it. Although you digress a little to make a point, month numbers are also, strictly speaking, categorical features. Yes, when a month is represented by its number (1 for January, 2 for Februrary etc.) it provides a convenient way to graph trends over a year. And, arguably, there is some logical interpretation of the average of 1 and 3 (January and March) being 2 (February). However, clearly December of one years precedes January of the next and yet 12 as a number is not less than 1. The numeric quantities in the section above are truly numeric; they are the number of feet in the drop, or acres or years open or the amount of snowfall etc.
 
-# In[36]:
+# In[25]:
 
 
 #Code task 6#
@@ -178,7 +179,7 @@ ski_data.select_dtypes('object')
 
 # #### 2.6.3.1 Unique Resort Names<a id='2.6.3.1_Unique_Resort_Names'></a>
 
-# In[38]:
+# In[8]:
 
 
 #Code task 7#
@@ -190,16 +191,18 @@ ski_data['Name'].value_counts().head()
 
 # **Q: 1** Is this resort duplicated if you take into account Region and/or state as well?
 
-# In[53]:
+# In[9]:
 
 
 #Code task 8#
 #Concatenate the string columns 'Name' and 'Region' and count the values again (as above)
 # why arent the same as the one below 
+# how would you specify one specific one like all of them that are named 
+# create a dataframe with crystal mountain steps 
 (ski_data['Name'] + ', ' + ski_data['Region']).value_counts().head(5)
 
 
-# In[48]:
+# In[10]:
 
 
 #Code task 9#
@@ -211,7 +214,7 @@ ski_data['Name'].value_counts().head()
 
 # # **A: 1** Your answer here
 
-# In[57]:
+# In[11]:
 
 
 ski_data[ski_data['Name'] == 'Crystal Mountain']
@@ -225,12 +228,13 @@ ski_data[ski_data['Name'] == 'Crystal Mountain']
 
 # You know they are the same in many cases (e.g. both the Region and the state are given as 'Michigan'). In how many cases do they differ?
 
-# In[120]:
+# In[12]:
 
 
 #Code task 10#
 #Calculate the number of times Region does not equal state
 (ski_data.Region != ski_data.state).sum()
+ski_data[ski_data.Region != ski_data.state]
 
 
 # You know what a state is. What is a region? You can tabulate the distinct values along with their respective frequencies using `value_counts()`.
@@ -243,7 +247,7 @@ ski_data['Region'].value_counts()
 
 # A casual inspection by eye reveals some non-state names such as Sierra Nevada, Salt Lake City, and Northern California. Tabulate the differences between Region and state. On a note regarding scaling to larger data sets, you might wonder how you could spot such cases when presented with millions of rows. This is an interesting point. Imagine you have access to a database with a Region and state column in a table and there are millions of rows. You wouldn't eyeball all the rows looking for differences! Bear in mind that our first interest lies in establishing the answer to the question "Are they always the same?" One approach might be to ask the database to return records where they differ, but limit the output to 10 rows. If there were differences, you'd only get up to 10 results, and so you wouldn't know whether you'd located all differences, but you'd know that there were 'a nonzero number' of differences. If you got an empty result set back, then you would know that the two columns always had the same value. At the risk of digressing, some values in one column only might be NULL (missing) and different databases treat NULL differently, so be aware that on many an occasion a seamingly 'simple' question gets very interesting to answer very quickly!
 
-# In[73]:
+# In[14]:
 
 
 #Code task 11#
@@ -259,7 +263,7 @@ ski_data['Region'].value_counts()
 
 # #### 2.6.3.3 Number of distinct regions and states<a id='2.6.3.3_Number_of_distinct_regions_and_states'></a>
 
-# In[79]:
+# In[15]:
 
 
 #Code task 12#
@@ -275,7 +279,7 @@ ski_data[['Region', 'state']].nunique()
 
 # If this is your first time using [matplotlib](https://matplotlib.org/3.2.2/index.html)'s [subplots](https://matplotlib.org/3.2.2/api/_as_gen/matplotlib.pyplot.subplots.html), you may find the online documentation useful.
 
-# In[80]:
+# In[16]:
 
 
 #Code task 13#
@@ -308,7 +312,7 @@ plt.subplots_adjust(wspace=0.5);
 
 # ##### 2.6.3.5.1 Average weekend and weekday price by state<a id='2.6.3.5.1_Average_weekend_and_weekday_price_by_state'></a>
 
-# In[84]:
+# In[17]:
 
 
 #Code task 14#
@@ -334,10 +338,22 @@ state_price_means.head()
 plt.xlabel('Price ($)');
 
 
-# In[85]:
+# In[19]:
 
 
 get_ipython().set_next_input('The figure above represents a dataframe with two columns, one for the average prices of each kind of ticket. This tells you how the average ticket price varies from state to state. But can you get more insight into the difference in the distributions between states');get_ipython().run_line_magic('pinfo', 'states')
+
+
+# In[ ]:
+
+
+The figure above represents a dataframe with two columns, one for the average prices of each kind of ticket. This tells you how the average ticket price varies from state to state. But can you get more insight into the difference in the distributions between states
+
+
+# In[20]:
+
+
+The figure above represents a dataframe with two columns, one for the average prices of each kind of ticket. This tells you how the average ticket price varies from state to state. But can you get more insight into the difference in the distributions between states
 
 
 # In[ ]:
@@ -350,7 +366,7 @@ The figure above represents a dataframe with two columns, one for the average pr
 
 # Next, you can transform the data into a single column for price with a new categorical column that represents the ticket type.
 
-# In[86]:
+# In[ ]:
 
 
 #Code task 15#
@@ -366,7 +382,7 @@ ticket_prices = pd.melt(ski_data[['state', 'AdultWeekday', 'AdultWeekend']],
                         value_name='Price')
 
 
-# In[87]:
+# In[ ]:
 
 
 ticket_prices.head()
@@ -374,7 +390,7 @@ ticket_prices.head()
 
 # This is now in a format we can pass to [seaborn](https://seaborn.pydata.org/)'s [boxplot](https://seaborn.pydata.org/generated/seaborn.boxplot.html) function to create boxplots of the ticket price distributions for each ticket type for each state.
 
-# In[90]:
+# In[ ]:
 
 
 #Code task 16#
@@ -411,7 +427,7 @@ Having decided to reserve judgement on how exactly you utilize the State, turn y
 
 # #### 2.6.4.1 Numeric data summary<a id='2.6.4.1_Numeric_data_summary'></a>
 
-# In[94]:
+# In[ ]:
 
 
 #Code task 17#
@@ -423,7 +439,7 @@ ski_data.describe().transpose()
 
 # Recall you're missing the ticket prices for some 16% of resorts. This is a fundamental problem that means you simply lack the required data for those resorts and will have to drop those records. But you may have a weekend price and not a weekday price, or vice versa. You want to keep any price you have.
 
-# In[104]:
+# In[ ]:
 
 
 missing_price = ski_data[['AdultWeekend', 'AdultWeekday']].isnull().sum(axis=1)
@@ -436,7 +452,7 @@ missing_price.value_counts()/len(missing_price) * 100
 
 # Note that, although we are still in the 'data wrangling and cleaning' phase rather than exploratory data analysis, looking at distributions of features is immensely useful in getting a feel for whether the values look sensible and whether there are any obvious outliers to investigate. Some exploratory data analysis belongs here, and data wrangling will inevitably occur later on. It's more a matter of emphasis. Here, we're interesting in focusing on whether distributions look plausible or wrong. Later on, we're more interested in relationships and patterns.
 
-# In[112]:
+# In[ ]:
 
 
 #Code task 18#
@@ -461,7 +477,7 @@ plt.subplots_adjust(hspace=0.5)
 
 # ##### 2.6.4.2.1 SkiableTerrain_ac<a id='2.6.4.2.1_SkiableTerrain_ac'></a>
 
-# In[114]:
+# In[ ]:
 
 
 #Code task 19#
@@ -471,7 +487,7 @@ ski_data.SkiableTerrain_ac[ski_data.SkiableTerrain_ac > 10000]
 
 # **Q: 2** One resort has an incredibly large skiable terrain area! Which is it?
 
-# In[118]:
+# In[ ]:
 
 
 #Code task 20#
@@ -490,7 +506,7 @@ ski_data[ski_data.SkiableTerrain_ac > 10000].head()
 
 # You can spot check data. You see your top and base elevation values agree, but the skiable area is very different. Your suspect value is 26819, but the value you've just looked up is 1819. The last three digits agree. This sort of error could have occured in transmission or some editing or transcription stage. You could plausibly replace the suspect value with the one you've just obtained. Another cautionary note to make here is that although you're doing this in order to progress with your analysis, this is most definitely an issue that should have been raised and fed back to the client or data originator as a query. You should view this "data correction" step as a means to continue (documenting it carefully as you do in this notebook) rather than an ultimate decision as to what is correct.
 
-# In[121]:
+# In[ ]:
 
 
 #Code task 21#
@@ -498,7 +514,7 @@ ski_data[ski_data.SkiableTerrain_ac > 10000].head()
 ski_data.loc[39, 'SkiableTerrain_ac']
 
 
-# In[122]:
+# In[ ]:
 
 
 #Code task 22#
@@ -506,7 +522,7 @@ ski_data.loc[39, 'SkiableTerrain_ac']
 ski_data.loc[39, 'SkiableTerrain_ac'] = 1819
 
 
-# In[123]:
+# In[ ]:
 
 
 #Code task 23#
@@ -518,7 +534,7 @@ ski_data.loc[39, 'SkiableTerrain_ac']
 
 # What does the distribution of skiable area look like now?
 
-# In[124]:
+# In[ ]:
 
 
 ski_data.SkiableTerrain_ac.hist(bins=30)
@@ -531,14 +547,14 @@ plt.title('Distribution of skiable area (acres) after replacing erroneous value'
 
 # ##### 2.6.4.2.2 Snow Making_ac<a id='2.6.4.2.2_Snow_Making_ac'></a>
 
-# In[137]:
+# In[ ]:
 
 
 # what does it twice do 
 ski_data['Snow Making_ac'][ski_data['Snow Making_ac'] > 1000]
 
 
-# In[138]:
+# In[ ]:
 
 
 ski_data[ski_data['Snow Making_ac'] > 3000].T
@@ -548,7 +564,7 @@ ski_data[ski_data['Snow Making_ac'] > 3000].T
 
 # What, then, is your rough guess for the area covered by snowmaking?
 
-# In[167]:
+# In[ ]:
 
 
 .6 * 4800
@@ -560,7 +576,7 @@ ski_data[ski_data['Snow Making_ac'] > 3000].T
 
 # Look at the different fastEight values more closely:
 
-# In[146]:
+# In[ ]:
 
 
 ski_data.fastEight.value_counts()
@@ -568,7 +584,7 @@ ski_data.fastEight.value_counts()
 
 # Drop the fastEight column in its entirety; half the values are missing and all but the others are the value zero. There is essentially no information in this column.
 
-# In[147]:
+# In[ ]:
 
 
 #Code task 24#
@@ -578,7 +594,7 @@ ski_data.drop(columns='fastEight', inplace=True)
 
 # What about yearsOpen? How many resorts have purportedly been open for more than 100 years?
 
-# In[169]:
+# In[ ]:
 
 
 #Code task 25#
@@ -590,7 +606,7 @@ ski_data.yearsOpen[ski_data.yearsOpen > 100]
 
 # What does the distribution of yearsOpen look like if you exclude just the obviously wrong one?
 
-# In[179]:
+# In[ ]:
 
 
 #Code task 26#
@@ -607,7 +623,7 @@ plt.title('Distribution of years open excluding 2019');
 
 # Let's review the summary statistics for the years under 1000.
 
-# In[180]:
+# In[ ]:
 
 
 ski_data.yearsOpen[ski_data.yearsOpen < 1000].describe()
@@ -615,7 +631,7 @@ ski_data.yearsOpen[ski_data.yearsOpen < 1000].describe()
 
 # The smallest number of years open otherwise is 6. You can't be sure whether this resort in question has been open zero years or one year and even whether the numbers are projections or actual. In any case, you would be adding a new youngest resort so it feels best to simply drop this row.
 
-# In[186]:
+# In[ ]:
 
 
 # what the diffrence bewteen .head and .head()!!
@@ -643,7 +659,7 @@ ski_data = ski_data[ski_data.yearsOpen < 1000]
 
 # A fairly new groupby behaviour is [named aggregation](https://pandas-docs.github.io/pandas-docs-travis/whatsnew/v0.25.0.html). This allows us to clearly perform the aggregations you want whilst also creating informative output column names.
 
-# In[188]:
+# In[ ]:
 
 
 #Code task 27#
@@ -667,16 +683,22 @@ state_summary.head()
 
 # You know there are two columns that refer to price: 'AdultWeekend' and 'AdultWeekday'. You can calculate the number of price values missing per row. This will obviously have to be either 0, 1, or 2, where 0 denotes no price values are missing and 2 denotes that both are missing.
 
-# In[41]:
+# In[ ]:
 
 
 missing_price = ski_data[['AdultWeekend', 'AdultWeekday']].isnull().sum(axis=1)
 missing_price.value_counts()/len(missing_price) * 100
 
 
+# In[ ]:
+
+
+missing_price
+
+
 # About 14% of the rows have no price data. As the price is your target, these rows are of no use. Time to lose them.
 
-# In[189]:
+# In[ ]:
 
 
 #Code task 28#
@@ -687,7 +709,7 @@ ski_data = ski_data[missing_price != 2]
 
 # ## 2.9 Review distributions<a id='2.9_Review_distributions'></a>
 
-# In[191]:
+# In[ ]:
 
 
 ski_data.hist(figsize=(15, 10))
@@ -700,7 +722,7 @@ plt.subplots_adjust(hspace=0.5);
 
 # Population and area data for the US states can be obtained from [wikipedia](https://simple.wikipedia.org/wiki/List_of_U.S._states). Listen, you should have a healthy concern about using data you "found on the Internet". Make sure it comes from a reputable source. This table of data is useful because it allows you to easily pull and incorporate an external data set. It also allows you to proceed with an analysis that includes state sizes and populations for your 'first cut' model. Be explicit about your source (we documented it here in this workflow) and ensure it is open to inspection. All steps are subject to review, and it may be that a client has a specific source of data they trust that you should use to rerun the analysis.
 
-# In[192]:
+# In[ ]:
 
 
 #Code task 29#
@@ -709,19 +731,19 @@ states_url = 'https://simple.wikipedia.org/w/index.php?title=List_of_U.S._states
 usa_states = pd.read_html(states_url)
 
 
-# In[193]:
+# In[ ]:
 
 
 type(usa_states)
 
 
-# In[194]:
+# In[ ]:
 
 
 len(usa_states)
 
 
-# In[195]:
+# In[ ]:
 
 
 usa_states = usa_states[0]
@@ -730,7 +752,7 @@ usa_states.head()
 
 # Note, in even the last year, the capability of `pd.read_html()` has improved. The merged cells you see in the web table are now handled much more conveniently, with 'Phoenix' now being duplicated so the subsequent columns remain aligned. But check this anyway. If you extract the established date column, you should just get dates. Recall previously you used the `.loc` accessor, because you were using labels. Now you want to refer to a column by its index position and so use `.iloc`. For a discussion on the difference use cases of `.loc` and `.iloc` refer to the [pandas documentation](https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html).
 
-# In[199]:
+# In[ ]:
 
 
 #Code task 30#
@@ -739,7 +761,7 @@ usa_states.head()
 established = usa_states.iloc[:, 4]
 
 
-# In[200]:
+# In[ ]:
 
 
 established
@@ -747,7 +769,7 @@ established
 
 # Extract the state name, population, and total area (square miles) columns.
 
-# In[201]:
+# In[ ]:
 
 
 #Code task 31#
@@ -761,14 +783,14 @@ usa_states_sub.head()
 
 # Do you have all the ski data states accounted for?
 
-# In[202]:
+# In[ ]:
 
 
 #Code task 32#
 #Find the states in `state_summary` that are not in `usa_states_sub`
 #Hint: set(list1) - set(list2) is an easy way to get items in list1 that are not in list2
 # is this right what is set doing what are these list from !!!
-missing_states = set(state_summary.state) - set(usa_states_sub.state)
+missing_states = set(state_summary.state.tolist()) - set(usa_states_sub.state.tolist())
 missing_states
 
 
@@ -776,7 +798,7 @@ missing_states
 
 # If you look at the table on the web, you can perhaps start to guess what the problem is. You can confirm your suspicion by pulling out state names that _contain_ 'Massachusetts', 'Pennsylvania', or 'Virginia' from usa_states_sub:
 
-# In[203]:
+# In[ ]:
 
 
 usa_states_sub.state[usa_states_sub.state.str.contains('Massachusetts|Pennsylvania|Rhode Island|Virginia')]
@@ -784,7 +806,7 @@ usa_states_sub.state[usa_states_sub.state.str.contains('Massachusetts|Pennsylvan
 
 # Delete square brackets and their contents and try again:
 
-# In[204]:
+# In[ ]:
 
 
 #Code task 33#
@@ -798,13 +820,13 @@ usa_states_sub.state.replace(to_replace='\[.*\]', value='', regex=True, inplace=
 usa_states_sub.state[usa_states_sub.state.str.contains('Massachusetts|Pennsylvania|Rhode Island|Virginia')]
 
 
-# In[206]:
+# In[ ]:
 
 
 #Code task 34#
 #And now verify none of our states are missing by checking that there are no states in
 #state_summary that are not in usa_states_sub (as earlier using `set()`)
-missing_states = set(state_summary.state) - set(usa_states_sub.state)
+missing_states = set(state_summary.state.tolist()) - set(usa_states_sub.state.tolist())
 missing_states
 
 
@@ -826,7 +848,7 @@ state_summary.head()
 
 # Finally, what will your target be when modelling ticket price? What relationship is there between weekday and weekend prices?
 
-# In[207]:
+# In[ ]:
 
 
 #Code task 36#
@@ -837,7 +859,7 @@ ski_data.plot(x='AdultWeekday', y='AdultWeekend', kind='scatter');
 
 # A couple of observations can be made. Firstly, there is a clear line where weekend and weekday prices are equal. Weekend prices being higher than weekday prices seem restricted to sub $100 resorts. Recall from the boxplot earlier that the distribution for weekday and weekend prices in Montana seemed equal. Is this confirmed in the actual data for each resort? Big Mountain resort is in Montana, so the relationship between these quantities in this state are particularly relevant.
 
-# In[211]:
+# In[ ]:
 
 
 #Code task 37#
@@ -847,7 +869,7 @@ ski_data.loc[ski_data.state == 'Montana', ['AdultWeekend', 'AdultWeekday']]
 
 # Is there any reason to prefer weekend or weekday prices? Which is missing the least?
 
-# In[212]:
+# In[ ]:
 
 
 ski_data[['AdultWeekend', 'AdultWeekday']].isnull().sum()
@@ -855,14 +877,14 @@ ski_data[['AdultWeekend', 'AdultWeekday']].isnull().sum()
 
 # Weekend prices have the least missing values of the two, so drop the weekday prices and then keep just the rows that have weekend price.
 
-# In[59]:
+# In[ ]:
 
 
 ski_data.drop(columns='AdultWeekday', inplace=True)
 ski_data.dropna(subset=['AdultWeekend'], inplace=True)
 
 
-# In[60]:
+# In[ ]:
 
 
 ski_data.shape
@@ -874,7 +896,7 @@ ski_data.shape
 
 # Having dropped rows missing the desired target ticket price, what degree of missingness do you have for the remaining rows?
 
-# In[61]:
+# In[ ]:
 
 
 missing = pd.concat([ski_data.isnull().sum(axis=1), 100 * ski_data.isnull().mean(axis=1)], axis=1)
@@ -884,7 +906,7 @@ missing.sort_values(by='count', ascending=False).head(10)
 
 # These seem possibly curiously quantized...
 
-# In[62]:
+# In[ ]:
 
 
 missing['%'].unique()
@@ -892,7 +914,7 @@ missing['%'].unique()
 
 # Yes, the percentage of missing values per row appear in multiples of 4.
 
-# In[63]:
+# In[ ]:
 
 
 missing['%'].value_counts()
@@ -900,7 +922,7 @@ missing['%'].value_counts()
 
 # This is almost as if values have been removed artificially... Nevertheless, what you don't know is how useful the missing features are in predicting ticket price. You shouldn't just drop rows that are missing several useless features.
 
-# In[64]:
+# In[ ]:
 
 
 ski_data.info()
@@ -910,13 +932,13 @@ ski_data.info()
 
 # ## 2.12 Save data<a id='2.12_Save_data'></a>
 
-# In[65]:
+# In[ ]:
 
 
 ski_data.shape
 
 
-# In[215]:
+# In[ ]:
 
 
 ski_data.to_csv('/Users/shayansorooshian/Desktop/cs/DATA Science /Guided Capstone/DATA Wrangling/cleaned.csv', index = False)
@@ -924,7 +946,7 @@ ski_data.to_csv('/Users/shayansorooshian/Desktop/cs/DATA Science /Guided Capston
 
 # Save this to your data directory, separately. Note that you were provided with the data in `raw_data` and you should saving derived data in a separate location. This guards against overwriting our original data.
 
-# In[213]:
+# In[ ]:
 
 
 # save the data to a new csv file
@@ -932,7 +954,7 @@ datapath = '/Users/shayansorooshian/Desktop/cs/DATA Science /Guided Capstone/DAT
 save_file(ski_data, 'ski_data_cleaned.csv', datapath)
 
 
-# In[67]:
+# In[ ]:
 
 
 # save the state_summary separately.
